@@ -18,6 +18,7 @@ public:
 	// constructors/destructors
 	Quaternion();									// default constructor
 	Quaternion(const Vector axis, const double angle);
+	Quaternion(double re, double x, double y, double z);
 	~Quaternion();
 
 	// further necessary methods and operations...
@@ -29,8 +30,16 @@ public:
 	Quaternion quaternionMultiplication(Quaternion q1, Quaternion q2);
 	Quaternion getComplexCon() const;
 
-	Quaternion  operator *  (const Quaternion& q2) const;		// result  =  (*this) * v
+	Quaternion  operator *  (const Quaternion& q2) const;
+	Quaternion  operator *  (const double& t) const;
+	Quaternion  operator /  (const double& t) const;
+	Quaternion  operator +  (const Quaternion& q2) const;
+	Quaternion  operator ^  (const double& t)  const;
 
 	double getAxisLength(Vector axis);
 	Vector getNormalizedAxis(Vector axis);
+	double getLength() const;
+
+	void normalize();
+	Quaternion inverse(const Quaternion& q);
 };

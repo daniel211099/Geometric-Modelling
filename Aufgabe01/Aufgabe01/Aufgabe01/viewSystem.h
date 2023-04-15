@@ -25,6 +25,8 @@ private:
 
 	AffineMap RotationMatrix(Vector Vector, double angle);
 
+	double dotProduct(Quaternion q1, Quaternion q2);
+
 public:
 	// constructors
 	viewSystem(                                                                      );
@@ -65,6 +67,11 @@ public:
 
 	// assignment operators
 	viewSystem &operator = (const viewSystem &vs);
+
+	Quaternion LERP(Quaternion q0, Quaternion q1, double t);
+	Quaternion SLERP(Quaternion q0, Quaternion q1, double t);
+	Quaternion NLERP(Quaternion q0, Quaternion q1, double t);
+
 
 };
 

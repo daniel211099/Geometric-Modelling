@@ -108,11 +108,63 @@ void keyboard (unsigned char key, int x, int y)
 		case 'W': view.Translate(Vector(0, 0,  T_STEP, 0)); break;
 		case 'w': view.Translate(Vector(0, 0, -T_STEP, 0)); break;
 		// (S)LERPs-----------------------------------------------------------------------------
-		case 'l': // to be done in Aufgabe03
-		case 'L': // to be done in Aufgabe03
-		case 'n': // to be done in Aufgabe03
+		case 'l': 
+		{
+			double phi0 = 0;
+			double phi1 = 2.2;
+			Vector v1 = Vector(0, 1, 0);
+			Vector v2 = Vector(1, 1, 1);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+
+			double t = 0.02;
+			for (int i = 0; i <= 1 / t; i++) 
+			{
+				Sleep(20);
+				Quaternion qr = view.LERP(q0, q1, t); // 1
+				view.Rotate(qr);
+				display();
+			}
+			break;
+		}
+		case 'L':
+		case 'n': 
+		{
+			double phi0 = 0;
+			double phi1 = 2.2;
+			Vector v1 = Vector(0, 1, 0);
+			Vector v2 = Vector(1, 1, 1);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+
+			double t = 0.02;
+			for (int i = 0; i <= 1 / t; i++) {
+				Sleep(20);
+				Quaternion qr = view.SLERP(q0, q1, t); // 1
+				view.Rotate(qr);
+				display();
+			}
+			break;
+		}
 		case 'N': // to be done in Aufgabe03
-		case 's': // to be done in Aufgabe03
+		case 's': 
+		{
+			double phi0 = 0;
+			double phi1 = 2.2;
+			Vector v1 = Vector(0, 1, 0);
+			Vector v2 = Vector(1, 1, 1);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+			
+			double t = 0.02;
+			for (int i = 0; i <= 1 / t; i++) {
+				Sleep(20);
+				Quaternion qr = view.NLERP(q0, q1, 0.02); 
+				view.Rotate(qr);
+				display();
+			}
+			break;
+		}
 		case 'S': // to be done in Aufgabe03
 			break;
 		// Help--------------------------------------------------------------------------------

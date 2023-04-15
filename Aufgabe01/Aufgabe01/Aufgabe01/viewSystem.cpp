@@ -189,18 +189,8 @@ void viewSystem::RotateDir(double angle)
 		{
 			// AUFGABE02
 			Quaternion q = Quaternion(ViewDir, angle);
-			Quaternion qt = q.getComplexCon();
-			Quaternion p;
-
-			p.setRe(0);
-			p.setIm(ViewUp[0], ViewUp[1], ViewUp[2]);
-
-			Quaternion n = q * p * q.getComplexCon();
-
-
-			ViewUp[0] += n.getIm()[0];
-			ViewUp[1] += n.getIm()[1];
-			ViewUp[2] += n.getIm()[2];
+			
+			Rotate(q);
 			break;
 		}
 		case RotationMode::MAX_ROTATION_MODE:
@@ -223,18 +213,7 @@ void viewSystem::RotateUp(double angle)
 		{
 			// AUFGABE02
 			Quaternion q = Quaternion(ViewUp, angle);
-			Quaternion qt = q.getComplexCon();
-			Quaternion pViewUp;
-
-			pViewUp.setRe(0);
-			pViewUp.setIm(ViewDir[0], ViewDir[1], ViewDir[2]);
-
-			Quaternion n = q * pViewUp * q.getComplexCon();
-
-
-			ViewDir[0] += n.getIm()[0];
-			ViewDir[1] += n.getIm()[1];
-			ViewDir[2] += n.getIm()[2];
+			Rotate(q);
 			break;
 		}
 		case RotationMode::MAX_ROTATION_MODE:
@@ -264,22 +243,8 @@ void viewSystem::RotateHor(double angle)
 		{
 			// AUFGABE02
 			Quaternion q = Quaternion(ViewHor, angle);
-			Quaternion qt = q.getComplexCon();
-			Quaternion pView;
-
-			pView.setRe(0);
-			pView.setIm(ViewDir[0], ViewDir[1], ViewDir[2]);
-
-			Quaternion nDir = q * pView * q.getComplexCon();
-
-			ViewDir[0] += nDir.getIm()[0];
-			ViewDir[1] += nDir.getIm()[1];
-			ViewDir[2] += nDir.getIm()[2];
-
+			Rotate(q);
 			ViewUp = ViewHor ^ ViewDir;
-
-
-
 			break;
 		}
 		case RotationMode::MAX_ROTATION_MODE:
@@ -305,26 +270,28 @@ void viewSystem::Rotate(const AffineMap& mat)
 void viewSystem::Rotate(const Quaternion& q)	// rotate by quaternion quat
 {
 	AffineMap Rot;
-	double a = q.getRe();
-	double b = q.getIm()[0];
-	double c = q.getIm()[1];
-	double d = q.getIm()[1];
 
-	Rot( 0, 0) = a * a + b * b - c * c - d * d;
-	Rot(1, 0) = 2 * (b * c - a * d);
-	Rot(2, 0) = 2 * (b * d - a * c);
+	Quaternion qViewDir;
+	qViewDir.setRe(0);
+	qViewDir.setIm(ViewDir[0], ViewDir[1], ViewDir[2]);
 
-	Rot(0, 1) = 2 * (b * c + a * d);
-	Rot(1, 1) = a * a - b * b + c * c - d * d;
-	Rot(2, 1) = 2 * (c * d - a * b);
+	Quaternion qViewUp;
+	qViewUp.setRe(0);
+	qViewUp.setIm(ViewUp[0], ViewUp[1], ViewUp[2]);
 
-	Rot(0, 2) = 2 * (b * d - a * c);
-	Rot(1, 2) = 2 * (c * d + a * b);
-	Rot(2, 2) = a * a - b * b - c * c + d * d;
+	
+	Quaternion nDir = q * qViewDir * q.getComplexCon();
+	Quaternion nUp = q * qViewUp * q.getComplexCon();
 
-	//EyePoint = Rot * EyePoint;
-	ViewDir = Rot * ViewDir;
-	ViewUp = Rot * ViewUp;
+	// Umwandeln in ViewDie und ViewUp
+	ViewDir[0] += nDir.getIm()[0];
+	ViewDir[1] += nDir.getIm()[1];
+	ViewDir[2] += nDir.getIm()[2];
+
+	ViewUp[0] += nUp.getIm()[0];
+	ViewUp[1] += nUp.getIm()[1];
+	ViewUp[2] += nUp.getIm()[2];
+
 
 	ViewDir.normalize();
 	ViewUp.normalize();
@@ -458,6 +425,46 @@ AffineMap viewSystem::RotationMatrix(Vector axis, double angle)
 	}
 
 	return Rot;
+}
+
+
+
+Quaternion viewSystem::LERP(Quaternion q0, Quaternion q1, double t) {
+
+	q0.normalize();
+	q1.normalize();
+	Quaternion rotation = q0*(1 - t)  +q1*t;
+	return rotation;
+
+}
+Quaternion viewSystem::SLERP(Quaternion q0,Quaternion q1,double t) {
+	// Normnalize input quaternions
+	q0.normalize();
+	q1.normalize();
+
+	double dot = dotProduct(q0, q1);
+	double angle = acos(dot);
+
+	double sin_angle = sin(angle);
+
+	double w1 = sin((1 - t) * angle) / sin_angle;
+	double w2 = sin(t * angle) / sin_angle;
+
+	Quaternion res = (q0*w1) + (q1*w2);
+	res.normalize();
+	return res;
+
+}
+Quaternion viewSystem::NLERP(Quaternion q1, Quaternion q2, double t) {
+	
+	Quaternion nlerpQ = LERP(q1, q2, t);
+	nlerpQ.normalize();
+	return nlerpQ;
+
+}
+double viewSystem::dotProduct(Quaternion q1, Quaternion q2)
+{
+	return q1.getRe() * q2.getRe() + q1.getIm()[0] * q2.getIm()[0] + q1.getIm()[1] * q2.getIm()[1] + q1.getIm()[2] * q2.getIm()[2];
 }
 
 // assignment operator
