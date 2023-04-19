@@ -283,6 +283,7 @@ void viewSystem::Rotate(const Quaternion& q)	// rotate by quaternion quat
 	Quaternion nDir = q * qViewDir * q.getComplexCon();
 	Quaternion nUp = q * qViewUp * q.getComplexCon();
 
+
 	// Umwandeln in ViewDie und ViewUp
 	ViewDir[0] += nDir.getIm()[0];
 	ViewDir[1] += nDir.getIm()[1];

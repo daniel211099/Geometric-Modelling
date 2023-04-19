@@ -111,16 +111,17 @@ void keyboard (unsigned char key, int x, int y)
 		case 'l': 
 		{
 			double phi0 = 0;
-			double phi1 = 2.2;
+			double phi1 = 3;
 			Vector v1 = Vector(0, 1, 0);
 			Vector v2 = Vector(1, 1, 1);
 			Quaternion q0 = Quaternion(v1, phi0);
 			Quaternion q1 = Quaternion(v2, phi1);
 
-			double t = 0.02;
-			for (int i = 0; i <= 1 / t; i++) 
+			double t = 0.01;
+			for (int i = 0; i < 100; i++)
 			{
-				Sleep(20);
+				Sleep(200);
+				t += 0.01;
 				Quaternion qr = view.LERP(q0, q1, t); // 1
 				view.Rotate(qr);
 				display();
@@ -131,16 +132,24 @@ void keyboard (unsigned char key, int x, int y)
 		case 'n': 
 		{
 			double phi0 = 0;
-			double phi1 = 2.2;
+			double phi1 = 1; 
 			Vector v1 = Vector(0, 1, 0);
-			Vector v2 = Vector(1, 1, 1);
+			Vector v2 = Vector(0, 1, 0);
 			Quaternion q0 = Quaternion(v1, phi0);
 			Quaternion q1 = Quaternion(v2, phi1);
 
-			double t = 0.02;
-			for (int i = 0; i <= 1 / t; i++) {
+			double t = 0.01;
+			for (int i = 0; i <= 100; i++) {
 				Sleep(20);
+				t += 0.01;
 				Quaternion qr = view.SLERP(q0, q1, t); // 1
+				std::cout << "w: " << qr.getRe() << std::endl;
+				std::cout << "x: " << qr.getIm()[0] << std::endl;
+				std::cout << "y: " << qr.getIm()[1] << std::endl;
+				std::cout << "z: " << qr.getIm()[2] << std::endl;
+				std::cout << "len: " << qr.getLength() << std::endl;
+				std::cout << "i: " << i << std::endl;
+
 				view.Rotate(qr);
 				display();
 			}
