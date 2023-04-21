@@ -132,14 +132,18 @@ void keyboard (unsigned char key, int x, int y)
 		case 'n': 
 		{
 			double phi0 = 0;
-			double phi1 = 1; 
-			Vector v1 = Vector(0, 1, 0);
-			Vector v2 = Vector(0, 1, 0);
+			double phi1 = 1.571;
+			Vector v1 = Vector(0, 0, 1);
+			Vector v2 = Vector(0, 0, 1);
 			Quaternion q0 = Quaternion(v1, phi0);
 			Quaternion q1 = Quaternion(v2, phi1);
 
+			view.Rotate(q1);
+			display();
+
+			/*
 			double t = 0.01;
-			for (int i = 0; i <= 100; i++) {
+			for (int i = 0; i <= 2; i++) {
 				Sleep(20);
 				t += 0.01;
 				Quaternion qr = view.SLERP(q0, q1, t); // 1
@@ -152,7 +156,7 @@ void keyboard (unsigned char key, int x, int y)
 
 				view.Rotate(qr);
 				display();
-			}
+			}*/
 			break;
 		}
 		case 'N': // to be done in Aufgabe03
@@ -176,6 +180,47 @@ void keyboard (unsigned char key, int x, int y)
 		}
 		case 'S': // to be done in Aufgabe03
 			break;
+		case '1': // to be done in Aufgabe03
+		{
+			double phi0 = 0;
+			double phi1 = 1.571;
+			Vector v1 = Vector(1, 0, 0);
+			Vector v2 = Vector(1, 0, 0);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+
+			view.Rotate(q1);
+			display();
+			break;
+		}
+
+		case '2': // to be done in Aufgabe03
+		{
+			double phi0 = 0;
+			double phi1 = 1.571;
+			Vector v1 = Vector(0, 1, 0);
+			Vector v2 = Vector(0, 1, 0);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+
+			view.Rotate(q1);
+			display();
+			break;
+		}
+
+		case '3': // to be done in Aufgabe03
+		{
+			double phi0 = 0;
+			double phi1 = 1.571;
+			Vector v1 = Vector(0, 0, 1);
+			Vector v2 = Vector(0, 0, 1);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+
+			view.Rotate(q1);
+			display();
+			break;
+		}
 		// Help--------------------------------------------------------------------------------
 		case 'h': case 'H':
 			cout << "Tastenbelegungen:"													<< endl << endl;

@@ -85,10 +85,10 @@ Quaternion Quaternion::inverse(const Quaternion& q) {
 Quaternion Quaternion::operator * (const Quaternion& q2)  const
 {
 	Quaternion q;
-	q.Re	   = Re * q2.Re    - Im[0] * Im[0] - Im[1] * q2.Im[1] - Im[2] * q2.Im[2];
-	double im1 = Re * q2.Im[0] + Im[0] * Re    + Im[1] * q2.Im[2] - Im[2] * q2.Im[1];
-	double im2 = Re * q2.Im[1] + Im[1] * Re    + Im[2] * q2.Im[0] - Im[0] * q2.Im[2];
-	double im3 = Re * q2.Im[2] + Im[2] * Re	   + Im[0] * q2.Im[1] - Im[1] * q2.Im[0];
+	q.Re	   = Re * q2.Re    - Im[0] * q2.Im[0] - Im[1] * q2.Im[1] - Im[2] * q2.Im[2];
+	double im1 = Re * q2.Im[0] + Im[0] * q2.Re    + Im[1] * q2.Im[2] - Im[2] * q2.Im[1];
+	double im2 = Re * q2.Im[1] + Im[1] * q2.Re    + Im[2] * q2.Im[0] - Im[0] * q2.Im[2];
+	double im3 = Re * q2.Im[2] + Im[2] * q2.Re	  + Im[0] * q2.Im[1] - Im[1] * q2.Im[0];
 	q.Im = Vector(im1, im2, im3);
 	return q;
 }
