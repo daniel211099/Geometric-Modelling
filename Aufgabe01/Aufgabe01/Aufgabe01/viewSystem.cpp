@@ -242,7 +242,7 @@ void viewSystem::RotateHor(double angle)
 		case RotationMode::VIEW_QUATERNION_MODE:
 		{
 			// AUFGABE02#
-			Quaternion q = Quaternion(ViewHor, angle);
+     		Quaternion q = Quaternion(ViewHor, angle);
 			q.normalize();
 			Rotate(q);
 			break;
@@ -271,7 +271,6 @@ void viewSystem::Rotate(const Quaternion& q)	// rotate by quaternion quat
 {
 	AffineMap Rot;
 
-	
 	Quaternion qViewDir;
 	qViewDir.setRe(0);
 	qViewDir.setIm(ViewDir[0], ViewDir[1], ViewDir[2]);
@@ -284,65 +283,16 @@ void viewSystem::Rotate(const Quaternion& q)	// rotate by quaternion quat
 	Quaternion nUp = q * qViewUp * q.getComplexCon();
 
 	// Umwandeln in ViewDie und ViewUp
-	ViewDir[0] += nDir.getIm()[0];
-	ViewDir[1] += nDir.getIm()[1];
-	ViewDir[2] += nDir.getIm()[2];
+	ViewDir[0] = nDir.getIm()[0];
+	ViewDir[1] = nDir.getIm()[1];
+	ViewDir[2] = nDir.getIm()[2];
 
-	ViewUp[0] += nUp.getIm()[0];
-	ViewUp[1] += nUp.getIm()[1];
-	ViewUp[2] += nUp.getIm()[2];
+	ViewUp[0] = nUp.getIm()[0];
+	ViewUp[1] = nUp.getIm()[1];
+	ViewUp[2] = nUp.getIm()[2];
 
 	ViewDir.normalize();
 	ViewUp.normalize();
-
-
-
-
-	std::cout << "w: " << q.getRe()			<< std::endl;
-	std::cout << "x: " << q.getIm()[0]		<< std::endl;
-	std::cout << "y: " << q.getIm()[1]		<< std::endl;
-	std::cout << "z: " << q.getIm()[2]		<< std::endl;
-	std::cout << "len: " << q.getLength()	<< std::endl;
-
-	std::cout << "qViewDir w: " << qViewDir.getRe() << std::endl;
-	std::cout << "qViewDir x: " << qViewDir.getIm()[0] << std::endl;
-	std::cout << "qViewDir y: " << qViewDir.getIm()[1] << std::endl;
-	std::cout << "qViewDir z: " << qViewDir.getIm()[2] << std::endl;
-	std::cout << "qViewDir len: " << qViewDir.getLength() << std::endl;
-
-	std::cout << "qViewUp w: " << qViewUp.getRe() << std::endl;
-	std::cout << "qViewUp x: " << qViewUp.getIm()[0] << std::endl;
-	std::cout << "qViewUp y: " << qViewUp.getIm()[1] << std::endl;
-	std::cout << "qViewUp z: " << qViewUp.getIm()[2] << std::endl;
-	std::cout << "qViewUp len: " << qViewUp.getLength() << std::endl;
-
-	std::cout << "nDir w: "		<<   nDir.getRe()		<< std::endl;
-	std::cout << "nDir x: "		<<   nDir.getIm()[0]	<< std::endl;
-	std::cout << "nDir y: "		<<   nDir.getIm()[1]	<< std::endl;
-	std::cout << "nDir z: "		<<   nDir.getIm()[2]	<< std::endl;
-	std::cout << "nDir len: "	<<   nDir.getLength()	<< std::endl;
-
-	std::cout << "nUp w: "		<<   nUp.getRe()		<< std::endl;
-	std::cout << "nUp x: "		<<   nUp.getIm()[0]		<< std::endl;
-	std::cout << "nUp y: "		<<   nUp.getIm()[1]		<< std::endl;
-	std::cout << "nUp z: "		<<   nUp.getIm()[2]		<< std::endl;
-	std::cout << "nUp len: "	<<   nUp.getLength()	<< std::endl;
-
-	std::cout << "Dir[0]: " << ViewDir[0] << std::endl;
-	std::cout << "Dir[1]: " << ViewDir[1] << std::endl;
-	std::cout << "Dir[2]: " << ViewDir[2] << std::endl;
-	std::cout << "Sum: "    << sqrt(ViewDir[0]* ViewDir[0] + ViewDir[1]* ViewDir[1] + ViewDir[2]* ViewDir[2]) << std::endl;
-
-	std::cout << "Up[0]: " << ViewUp[0] << std::endl;
-	std::cout << "Up[1]: " << ViewUp[1] << std::endl;
-	std::cout << "Up[2]: " << ViewUp[2] << std::endl;
-	std::cout << "Sum: "   << sqrt(ViewUp[0]* ViewUp[0] + ViewUp[1]* ViewUp[1] + ViewUp[2]* ViewUp[2]) << std::endl;
-
-	Vector ViewHor = ViewUp ^ ViewDir;
-	std::cout << "Hor[0]: " << ViewHor[0] << std::endl;
-	std::cout << "Hor[1]: " << ViewHor[1] << std::endl;
-	std::cout << "Hor[2]: " << ViewHor[2] << std::endl;
-	std::cout << "Sum: "	<< sqrt(ViewHor[0]* ViewHor[0] + ViewHor[1]* ViewHor[1] + ViewHor[2]* ViewHor[2]) << std::endl;
 	
 }
 
