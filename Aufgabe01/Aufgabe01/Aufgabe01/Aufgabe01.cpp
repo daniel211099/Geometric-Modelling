@@ -144,7 +144,6 @@ void keyboard (unsigned char key, int x, int y)
 				Sleep(20);
 				t += 0.01;
 				Quaternion qr = view.SLERP(q0, q1, t); // 1
-
 				view.Rotate(qr);
 				display();
 			}
