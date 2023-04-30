@@ -108,6 +108,8 @@ void keyboard (unsigned char key, int x, int y)
 		case 'W': view.Translate(Vector(0, 0,  T_STEP, 0)); break;
 		case 'w': view.Translate(Vector(0, 0, -T_STEP, 0)); break;
 		// (S)LERPs-----------------------------------------------------------------------------
+
+		case 'L':
 		case 'l': 
 		{
 			double phi0 = 0;
@@ -116,20 +118,22 @@ void keyboard (unsigned char key, int x, int y)
 			Vector v2 = Vector(1, 1, 1);
 			Quaternion q0 = Quaternion(v1, phi0);
 			Quaternion q1 = Quaternion(v2, phi1);
+			Quaternion old=q0;
 			
 			double t = 0.01;
-			for (int i = 0; i <= 20; i++)
+			for (int i = 0; i < 100; i++)
 			{
 				Sleep(20);
+				view.Rotate(old.getComplexCon());
 				t += 0.01;
-				std::cout << "T: " << t << "i: " << i << std::endl;
 				Quaternion qr = view.LERP(q0, q1, t); // 1
 				view.Rotate(qr);
+				old = qr;
 				display();
 			}
 			break;
 		}
-		case 'L':
+		case 'N': // to be done in Aufgabe03
 		case 'n': 
 		{
 			double phi0 = 0;
@@ -141,35 +145,38 @@ void keyboard (unsigned char key, int x, int y)
 
 			double t = 0.01;
 			for (int i = 0; i <= 20; i++) {
-				Sleep(20);
+				Sleep(40);
 				t += 0.01;
-				Quaternion qr = view.SLERP(q0, q1, t); // 1
-				view.Rotate(qr);
-				display();
-			}
-			break;
-		}
-		case 'N': // to be done in Aufgabe03
-		case 's': 
-		{
-			double phi0 = 0;
-			double phi1 = 2.2;
-			Vector v1 = Vector(0, 1, 0);
-			Vector v2 = Vector(1, 1, 1);
-			Quaternion q0 = Quaternion(v1, phi0);
-			Quaternion q1 = Quaternion(v2, phi1);
-			
-			double t = 0.02;
-			for (int i = 0; i <= 1 / t; i++) {
-				Sleep(20);
-				Quaternion qr = view.NLERP(q0, q1, 0.02); 
+				Quaternion qr = view.NLERP(q0, q1, t); // 1
 				view.Rotate(qr);
 				display();
 			}
 			break;
 		}
 		case 'S': // to be done in Aufgabe03
+		case 's': 
+		{
+			double phi0 = 0;
+			double phi1 = 1.5707963267948966;
+			Vector v1 = Vector(0, 1, 0);
+			Vector v2 = Vector(1, 1, 1);
+			Quaternion q0 = Quaternion(v1, phi0);
+			Quaternion q1 = Quaternion(v2, phi1);
+			Quaternion old = q0;
+
+			double t = 0.01;
+			for (int i = 0; i < 100; i++)
+			{
+				Sleep(20);
+				view.Rotate(old.getComplexCon());
+				t += 0.01;
+				Quaternion qr = view.SLERP(q0, q1, t); // 1
+				view.Rotate(qr);
+				old = qr;
+				display();
+			}
 			break;
+		}
 		// Help--------------------------------------------------------------------------------
 		case 'h': case 'H':
 			cout << "Tastenbelegungen:"													<< endl << endl;

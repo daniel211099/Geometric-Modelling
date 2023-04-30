@@ -38,20 +38,20 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="glwidget.h">
-      <Filter>Resource Files</Filter>
+      <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="mainwindow.h">
-      <Filter>Resource Files</Filter>
+      <Filter>Header Files</Filter>
     </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="points.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="mainwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="points.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
