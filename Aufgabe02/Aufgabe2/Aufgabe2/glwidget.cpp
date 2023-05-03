@@ -4,6 +4,8 @@
 #include <GL/GLU.h>
 #include "glut.h"
 #include "mainwindow.h"
+#include <iostream>
+#include "point.h"
 
 GLWidget::GLWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -29,6 +31,32 @@ GLWidget::~GLWidget()
 {
 }
 
+// Berechnung des Bezier Punkts für gegebens t 
+Point deCasteljau(const std::vector<Point>& points, double t) {
+    std::vector<Point> kontrollpunkte = points;
+    Point Q;
+    std::vector<Point> neue_kontrollpunkte;
+    while (kontrollpunkte.size() > 1) {
+        for (int i = 0; i < kontrollpunkte.size() - 1; i++) {
+            Q = kontrollpunkte[i] * (1 - t) + kontrollpunkte[i + 1] * t;
+            neue_kontrollpunkte.push_back(Q);
+        }
+        kontrollpunkte = neue_kontrollpunkte;
+        neue_kontrollpunkte.clear();
+    }
+    return kontrollpunkte[0];
+}
+
+void drawBezierCurve(std::vector<Point> kontrollPunkte, double ti) {
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_LINE_STRIP);
+    // Bestimmen der Punkte Bezier Punkte durch den deCasteljau Algorithmus
+    for (double t = 0; t <= 1; t += ti) {
+        Point p1 = deCasteljau(kontrollPunkte, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
+        glVertex2f(p1.x, p1.y);
+    }
+    glEnd();
+}
 void GLWidget::paintGL()
 {
     // clear
@@ -66,10 +94,31 @@ void GLWidget::paintGL()
     }
     glEnd();
 
-    // Kurve
-    glColor3f(1.0,1.0,1.0);
+    
     // AUFGABE: Hier Kurve zeichnen
-    // dabei epsilon_draw benutzen
+    // TODO: Was macht die Methode epsilon_draw ????
+    // dabei epsilon_draw benutzen   
+    // Umwandeln der Punkte in points zu Vector
+    // 1. Teil Punkte
+    std::vector<Point> points1;
+    for (int i = 0; i < 5; i++) {
+        double xValue = points.getPointX(i);
+        double yValue = points.getPointY(i);
+        points1.push_back(Point(xValue, yValue));
+    }
+    drawBezierCurve(points1, epsilon_draw); // Zeichnen der 1. Bezierkurve mit t = 0.01
+    // 2. Teil der Punkte
+    std::vector<Point> points2;
+    for (int i = 5; i < points.getCount(); i++) {
+        double xValue = points.getPointX(i);
+        double yValue = points.getPointY(i);
+        points2.push_back(Point(xValue, yValue));
+    }
+    drawBezierCurve(points2, epsilon_draw);
+    
+
+
+
 	
     // Schnittpunkte zeichnen
     if (doIntersection) {
