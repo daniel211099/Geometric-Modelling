@@ -15,6 +15,7 @@ public:
     int   getCount ();
     int   getClosestPoint (float x, float y);
     void  moveClosestPoint(float x, float y, float tox, float toy);
+    void  removePoint(int i);
 
 private:
     QList<QPointF> pointlist;

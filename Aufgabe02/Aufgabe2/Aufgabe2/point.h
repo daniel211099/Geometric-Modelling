@@ -10,7 +10,7 @@ public:
 
     Point  operator *  (double value) const;
     Point  operator +  (Point p) const;
-
+    Point  operator -  (Point p) const;
 private:
 
 };

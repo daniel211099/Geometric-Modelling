@@ -3,6 +3,9 @@
 Points::Points()
 {
 }
+void Points::removePoint(int i) {
+    pointlist.remove(i);
+}
 
 void Points::addPoint(float x,float y)
 {

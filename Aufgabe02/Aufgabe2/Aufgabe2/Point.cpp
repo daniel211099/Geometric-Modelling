@@ -22,3 +22,10 @@ Point Point::operator + (Point p)  const
 	pNew.y = p.y + this->y;
 	return pNew;
 }
+Point Point::operator - (Point p)  const
+{
+	Point pNew;
+	pNew.x = p.x - this->x;
+	pNew.y = p.y - this->y;
+	return pNew;
+}
