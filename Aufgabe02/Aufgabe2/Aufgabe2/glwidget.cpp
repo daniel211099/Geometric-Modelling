@@ -118,9 +118,9 @@ BoundingBox getBoundingBox(std::vector<Point> pList) {
     //glVertex2f(xMin, yMin);
     //glVertex2f(xMax, yMin);
     //glVertex2f(xMax, yMax);
-    //glVertex2f(xMin, yMax);
-    //glVertex2f(xMin, yMin);
-    //
+    ///glVertex2f(xMin, yMax);
+    ////glVertex2f(xMin, yMin);
+    ////
     //glEnd();
 
     BoundingBox box = BoundingBox();
@@ -247,7 +247,7 @@ void selfIntersectionBezier(std::vector<Point> b, double eps) {
     int c = 0;
     double intervall = (1 / (double(nrS)));
     std::vector<Point> bezierPoints;
-    for (double t = 0; t <= 1; t += 0.1) {
+    for (double t = 0; t <= 1; t += 0.05) {
         Point p1 = deCasteljau(b, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
         if (t <= intervall)
         {
@@ -261,12 +261,15 @@ void selfIntersectionBezier(std::vector<Point> b, double eps) {
         }
     }   
     segments.push_back(bezierPoints);
-    intersectBezier(segments[0], segments[1], eps);
-    intersectBezier(segments[0], segments[2], eps);
-    intersectBezier(segments[1], segments[0], eps);
-    intersectBezier(segments[1], segments[2], eps);
-    intersectBezier(segments[2], segments[0], eps);
-    intersectBezier(segments[2], segments[1], eps);
+    for (int i = 0; i < segments.size(); i++) {
+        for (int j = 0; j < segments.size(); j++) {
+            if (i == j)
+                continue;
+
+            intersectBezier(segments[i], segments[j], eps);
+
+        }
+    }
     std::cout << segments.size() << std::endl;
 }
 void GLWidget::paintGL()
@@ -341,7 +344,8 @@ void GLWidget::paintGL()
         glColor3f(1.0,0.0,1.0);
         // AUFGABE: Hier Selbstschnitte zeichnen
         // dabei epsilon_intersection benutzen
-        selfIntersectionBezier(points2,epsilon_intersection);
+        selfIntersectionBezier(points1, epsilon_intersection);
+        selfIntersectionBezier(points2, epsilon_intersection);
     }
 }
 
