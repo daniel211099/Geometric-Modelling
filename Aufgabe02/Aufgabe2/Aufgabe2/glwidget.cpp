@@ -1,4 +1,3 @@
-
 #include "glwidget.h"
 #include <QtGui>
 #include <GL/GLU.h>
@@ -59,8 +58,6 @@ std::vector<Point> pointSort(std::vector<Point>& points) {
 }
 
 
-
-
 // Berechnung des Bezier Punkts für gegebens t 
 Point deCasteljau(const std::vector<Point>& points, double t) {
     std::vector<Point> kontrollpunkte = points;
@@ -108,7 +105,7 @@ BoundingBox getBoundingBox(std::vector<Point> pList) {
         }
         if (xMax < pList[i].x) {
             xMax = pList[i].x;
-        }    
+        }
         if (yMax < pList[i].y) {
             yMax = pList[i].y;
         }
@@ -151,6 +148,50 @@ double maxDelta2(const std::vector<Point>& points) {
     }
     return maxDelta;
 }
+
+Point calculateIntersectionV2(const Point& p1, const Point& p2, const Point& p3, const Point& p4) {
+    // 1. Bestimmung der geraden gleichungen aus den gegebenen Punken
+    // Form der Gleichung y = m*x+b;
+
+    // 1.1 Berechnung m1 und m2
+    double m1 = (p2.y - p1.y) / (p2.x - p1.x);
+    double m2 = (p4.y - p3.y) / (p4.x - p3.x);
+
+    // 1.2 Berechnung von b1 und b2
+    double b1 = p1.y - m1 * p1.x;
+    double b2 = p3.y - m2 * p3.x;
+
+    // 2.1 Berechnung des Schnittpunktes der beiden geraden
+    double x = (b2 - b1) / (m1 - m2);
+
+    // 2.2 Berechnung des y Wert des schnitpunkts
+    double y = m1 * x + b1;
+
+    // Überprüfe ob der Berechnete wer auf der geraden liegt
+    double maxYL1 = std::max(p1.y, p2.y);
+    double maxYL2 = std::max(p3.y, p4.y);
+
+    double minYL1 = std::min(p1.y, p2.y);
+    double minYL2 = std::min(p3.y, p4.y);
+
+    double maxXL1 = std::max(p1.x, p2.x);
+    double maxXL2 = std::max(p3.x, p4.x);
+              
+    double minXL1 = std::min(p1.x, p2.x);
+    double minXL2 = std::min(p3.x, p4.x);
+
+    if ((y < minYL1) || (y < minYL2) || (y > maxYL1) || (y > maxYL2)) {
+        return { std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN() };
+    }
+    if ((x < minXL1) || (x < minXL2) || (x > maxXL1) || (x > maxXL2)) {
+        return { std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN() };
+    }
+
+    return Point(x, y);
+
+   
+}
+
 Point calculateIntersection(const Point& b0, const Point& b1, const Point& c0, const Point& c1) {
     double t1 = ((c0.y - b0.y) * (c1.x - c0.x) - (c0.x - b0.x) * (c1.y - c0.y)) / ((c1.x - c0.x) * (b1.y - b0.y) - (c1.y - c0.y) * (b1.x - b0.x));
     double t2 = ((b0.y - c0.y) * (b1.x - b0.x) - (b0.x - c0.x) * (b1.y - b0.y)) / ((c1.x - c0.x) * (b1.y - b0.y) - (c1.y - c0.y) * (b1.x - b0.x));
@@ -169,7 +210,7 @@ std::vector<Point> findIntersections(const std::vector<Point>& points1, const st
 
     for (size_t i = 0; i < points1.size() - 1; ++i) {
         for (size_t j = 0; j < points2.size() - 1; ++j) {
-            Point intersection = calculateIntersection(points1[i], points1[i + 1], points2[j], points2[j + 1]);
+            Point intersection = calculateIntersectionV2(points1[i], points1[i + 1], points2[j], points2[j + 1]);
             if (!std::isnan(intersection.x) && !std::isnan(intersection.y)) {
                 intersections.push_back(intersection);
             }
@@ -191,6 +232,7 @@ void intersectBezier(std::vector<Point> b, std::vector<Point> c, double eps) {
             std::vector<Point> a1;
             std::vector<Point> a2;
             double test = 1 / (2 * (double)m);
+            test = 0.5;
             for (double t = 0; t <= 1; t += test) {
                 Point p1 = deCasteljau(b, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
                 if (t <= 0.5) {
@@ -207,6 +249,7 @@ void intersectBezier(std::vector<Point> b, std::vector<Point> c, double eps) {
             std::vector<Point> d1;
             std::vector<Point> d2;
             double test = 1 / (2 * (double)n);
+            test = 0.5;
             for (double t = 0; t <= 1; t += test) {
                 Point p1 = deCasteljau(c, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
                 if (t <= 0.5) {
@@ -220,6 +263,20 @@ void intersectBezier(std::vector<Point> b, std::vector<Point> c, double eps) {
             intersectBezier(b, d2, eps);
         }
         else {
+            glLineWidth(0.5);
+            glColor3f(1.0, 0, 0);
+            glBegin(GL_LINE_STRIP);
+            for (int i = 0; i < b.size(); i++) {
+                glVertex2f(b[i].x, b[i].y);
+            }
+            glEnd();
+            glColor3f(0, 1.0, 0);
+            glBegin(GL_LINE_STRIP);
+            for (int i = 0; i < c.size(); i++) {
+                glVertex2f(c[i].x, c[i].y);
+            }
+            glEnd();
+            
             // Get longer array
             std::vector<Point> intersections = findIntersections(b,c);
 
@@ -331,9 +388,62 @@ void GLWidget::paintGL()
     }
     std::vector<Point> bezierPoints2 = drawBezierCurve(points2, epsilon_draw);
     	
-    // Schnittpunkte zeichnen
-
     
+    
+
+    /*
+    std::vector<Point> a1;
+    std::vector<Point> a2;
+
+    for (double t = 0; t <= 1; t += 0.1) {
+        Point p1 = deCasteljau(points1, t); 
+        if (t <= 0.5) {
+            a1.push_back(p1);
+        }
+        if (t >= 0.5) {
+            a2.push_back(p1);
+        }
+    }
+    glColor3f(1.0, 0, 0);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < a1.size(); i++) {
+        glVertex2f(a1[i].x, a1[i].y);
+    }
+    glEnd();
+    glColor3f(0, 1.0, 0);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < a2.size(); i++) {
+        glVertex2f(a2[i].x, a2[i].y);
+    }
+    glEnd();
+
+    std::vector<Point> b1;
+    std::vector<Point> b2;
+
+    for (double t = 0; t <= 1; t += 0.1) {
+        Point p1 = deCasteljau(points2, t); 
+        if (t <= 0.5) {
+            b1.push_back(p1);
+        }
+        if (t >= 0.5) {
+            b2.push_back(p1);
+        }
+    }
+    glColor3f(1.0, 0, 0);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < b1.size(); i++) {
+        glVertex2f(b1[i].x,b1[i].y);
+    }
+    glEnd();
+    glColor3f(0, 1.0, 0);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < b2.size(); i++) {
+        glVertex2f(b2[i].x, b2[i].y);
+    }
+    glEnd();
+    */
+
+    // Schnittpunkte zeichnen
     if (doIntersection) {
         glColor3f(0.0,1.0,0.0);
         // AUFGABE: Hier Schnitte zeichnen
@@ -420,9 +530,14 @@ void GLWidget::setSelfIntersection(int state)
 void GLWidget::setEpsilonDraw(double value)
 {
     epsilon_draw = value;
+    paintGL();
+    update();
+
 }
 
 void GLWidget::setEpsilonIntersection(double value)
 {
     epsilon_intersection = value;
+    paintGL();
+    update();
 }
