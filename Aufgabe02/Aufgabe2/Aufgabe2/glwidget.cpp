@@ -31,32 +31,27 @@ GLWidget::~GLWidget()
 {
 }
 
-std::vector<Point> pointSort(std::vector<Point>& points) {
-    std::vector<Point> a = points;
 
-    for (int i = 0; i < a.size(); i++) {
-        for (int j = 0; j < (a.size() - i - 1); j++) {
-            if (a[j].x > a[j + 1].x) {               
-                Point aj = a[j];
-                Point aj1= a[j + 1];
-                a[j + 1] = aj;
-                a[j]     = aj1;               
-            }
-            if (a[j].x == a[j + 1].x) {
-                double tjx = a[j].x;
-                double tj1 = a[j + 1].x;
-                if (a[j].y > a[j + 1].y) {
-                    Point aj = a[j];
-                    Point aj1 = a[j + 1];
-                    a[j + 1] = aj;
-                    a[j] = aj1;
-                }
-            }
-        }
+double maxDelta3(const std::vector<Point>& points) {
+    double maxDelta = 0.0;
+
+    for (int i = 0; i < points.size() - 2; i++) {
+        double delta = std::abs(points[i + 2].x - 2 * points[i + 1].x + points[i].x);
+        maxDelta = std::max(maxDelta, delta);
     }
-    return a;
+    return maxDelta;
 }
 
+
+double maxDelta2(const std::vector<Point>& points) {
+    double maxDelta = 0.0;
+
+    for (int i = 0; i < points.size() - 2; i++) {
+        double delta = std::max(std::abs(points[i + 2].x - 2 * points[i + 1].x + points[i].x),std::abs(points[i + 2].y - 2 * points[i + 1].y + points[i].y));
+        maxDelta = std::max(maxDelta, delta);
+    }
+    return maxDelta;
+}
 
 // Berechnung des Bezier Punkts für gegebens t 
 Point deCasteljau(const std::vector<Point>& points, double t) {
@@ -74,12 +69,14 @@ Point deCasteljau(const std::vector<Point>& points, double t) {
     return kontrollpunkte[0];
 }
 
-std::vector<Point> drawBezierCurve(std::vector<Point> kontrollPunkte, double ti) {
+std::vector<Point> drawBezierCurve(std::vector<Point> kontrollPunkte, double epsilon_draw) {
     std::vector<Point> bezierPoints;
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_LINE_STRIP);
+    //glPointSize(7.0);
+    //glBegin(GL_POINTS);
     // Bestimmen der Punkte Bezier Punkte durch den deCasteljau Algorithmus
-    for (double t = 0; t <= 1; t += ti) {
+    for (double t = 0; t <= 1; t += epsilon_draw) {
         Point p1 = deCasteljau(kontrollPunkte, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
         glVertex2f(p1.x, p1.y);
         bezierPoints.push_back(p1);
@@ -139,15 +136,8 @@ bool doBoundingBoxesIntersect(BoundingBox b, BoundingBox c) {
     return true;
 
 }
-double maxDelta2(const std::vector<Point>& points) {
-    double maxDelta = 0.0;
-    for (int i = 0; i < points.size() - 2; i++) {
-        double delta = std::max(std::abs(points[i + 2].x - 2 * points[i + 1].x + points[i].x),
-            std::abs(points[i + 2].y - 2 * points[i + 1].y + points[i].y));
-        maxDelta = std::max(maxDelta, delta);
-    }
-    return maxDelta;
-}
+
+
 
 Point calculateIntersectionV2(const Point& p1, const Point& p2, const Point& p3, const Point& p4) {
     // 1. Bestimmung der geraden gleichungen aus den gegebenen Punken
@@ -192,19 +182,6 @@ Point calculateIntersectionV2(const Point& p1, const Point& p2, const Point& p3,
    
 }
 
-Point calculateIntersection(const Point& b0, const Point& b1, const Point& c0, const Point& c1) {
-    double t1 = ((c0.y - b0.y) * (c1.x - c0.x) - (c0.x - b0.x) * (c1.y - c0.y)) / ((c1.x - c0.x) * (b1.y - b0.y) - (c1.y - c0.y) * (b1.x - b0.x));
-    double t2 = ((b0.y - c0.y) * (b1.x - b0.x) - (b0.x - c0.x) * (b1.y - b0.y)) / ((c1.x - c0.x) * (b1.y - b0.y) - (c1.y - c0.y) * (b1.x - b0.x));
-
-    if (t1 >= 0 && t1 <= 1 && t2 >= 0 && t2 <= 1) {
-        double Px = b0.x + t1 * (b1.x - b0.x);
-        double Py = b0.y + t1 * (b1.y - b0.y);
-        return { Px, Py };
-    }
-
-    // Return a point with NaN coordinates to indicate no intersection
-    return { std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN() };
-}
 std::vector<Point> findIntersections(const std::vector<Point>& points1, const std::vector<Point>& points2) {
     std::vector<Point> intersections;
 
@@ -220,6 +197,36 @@ std::vector<Point> findIntersections(const std::vector<Point>& points1, const st
     return intersections;
 }
 
+std::vector<Point> deCasteljauForIntersection(std::vector<Point> points, double t) {
+    std::vector<Point> kontrollpunkte = points;
+    Point Q;
+    std::vector<Point> neue_kontrollpunkte;
+    std::vector<std::vector<Point>> kListe;
+    while (kontrollpunkte.size() > 1) {
+        for (int i = 0; i < kontrollpunkte.size() - 1; i++) {
+            Q = kontrollpunkte[i] * (1 - t) + kontrollpunkte[i + 1] * t;
+            neue_kontrollpunkte.push_back(Q);
+        }
+        kListe.push_back(neue_kontrollpunkte);
+        kontrollpunkte = neue_kontrollpunkte;
+        neue_kontrollpunkte.clear();
+    }
+
+    neue_kontrollpunkte.push_back(points[0]);
+    for (std::vector<Point> pList : kListe)
+    {
+        neue_kontrollpunkte.push_back(pList[0]);
+    }
+    //V2 
+    for (int i = kListe.size()-1; i < kListe.size(); i--) {
+        neue_kontrollpunkte.push_back(kListe[i][kListe[i].size() - 1]);
+    }
+
+    neue_kontrollpunkte.push_back(points[points.size()-1]);
+
+    return neue_kontrollpunkte;
+}
+
 void intersectBezier(std::vector<Point> b, std::vector<Point> c, double eps) {
     // Get both bounding Boxes
     BoundingBox bB = getBoundingBox(b);
@@ -231,53 +238,38 @@ void intersectBezier(std::vector<Point> b, std::vector<Point> c, double eps) {
         if (m * (m - 1) * maxDelta2(b) > eps) {
             std::vector<Point> a1;
             std::vector<Point> a2;
-            double test = 1 / (2 * (double)m);
-            test = 0.5;
-            for (double t = 0; t <= 1; t += test) {
-                Point p1 = deCasteljau(b, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
-                if (t <= 0.5) {
-                    a1.push_back(p1);
+
+            std::vector<Point> points = deCasteljauForIntersection(b, 0.5);
+
+            for (int i = 0; i < points.size(); i++) {
+                if (i <= points.size() / 2) {
+                    a1.push_back(points[i]);
                 }
-                if (t >= 0.5) {
-                    a2.push_back(p1);
+                if (i >= points.size() / 2) {
+                    a2.push_back(points[i]);
                 }
-            }
+            }  
             intersectBezier(a1, c, eps);
             intersectBezier(a2, c, eps);
         }
         else if (n * (n - 1) * maxDelta2(c) > eps) {
             std::vector<Point> d1;
             std::vector<Point> d2;
-            double test = 1 / (2 * (double)n);
-            test = 0.5;
-            for (double t = 0; t <= 1; t += test) {
-                Point p1 = deCasteljau(c, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
-                if (t <= 0.5) {
-                    d1.push_back(p1);
+
+            std::vector<Point> points = deCasteljauForIntersection(c, 0.5);
+            
+            for (int i = 0; i < points.size(); i++) {
+                if (i <= points.size() / 2) {
+                    d1.push_back(points[i]);
                 }
-                if (t >= 0.5) {
-                    d2.push_back(p1);
+                if (i >= points.size() / 2) {
+                    d2.push_back(points[i]);
                 }
             }
             intersectBezier(b, d1, eps);
             intersectBezier(b, d2, eps);
         }
-        else {
-            glLineWidth(0.5);
-            glColor3f(1.0, 0, 0);
-            glBegin(GL_LINE_STRIP);
-            for (int i = 0; i < b.size(); i++) {
-                glVertex2f(b[i].x, b[i].y);
-            }
-            glEnd();
-            glColor3f(0, 1.0, 0);
-            glBegin(GL_LINE_STRIP);
-            for (int i = 0; i < c.size(); i++) {
-                glVertex2f(c[i].x, c[i].y);
-            }
-            glEnd();
-            
-            // Get longer array
+        else {            
             std::vector<Point> intersections = findIntersections(b,c);
 
             if (!intersections.empty()) {
@@ -329,6 +321,7 @@ void selfIntersectionBezier(std::vector<Point> b, double eps) {
     }
     std::cout << segments.size() << std::endl;
 }
+
 void GLWidget::paintGL()
 {
     // clear
@@ -379,6 +372,7 @@ void GLWidget::paintGL()
         points1.push_back(Point(xValue, yValue));
     }
     std::vector<Point> bezierPoints1 = drawBezierCurve(points1, epsilon_draw); // Zeichnen der 1. Bezierkurve mit t = 0.01
+
     // 2. Teil der Punkte
     std::vector<Point> points2;
     for (int i = 5; i < points.getCount(); i++) {
@@ -388,61 +382,6 @@ void GLWidget::paintGL()
     }
     std::vector<Point> bezierPoints2 = drawBezierCurve(points2, epsilon_draw);
     	
-    
-    
-
-    /*
-    std::vector<Point> a1;
-    std::vector<Point> a2;
-
-    for (double t = 0; t <= 1; t += 0.1) {
-        Point p1 = deCasteljau(points1, t); 
-        if (t <= 0.5) {
-            a1.push_back(p1);
-        }
-        if (t >= 0.5) {
-            a2.push_back(p1);
-        }
-    }
-    glColor3f(1.0, 0, 0);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < a1.size(); i++) {
-        glVertex2f(a1[i].x, a1[i].y);
-    }
-    glEnd();
-    glColor3f(0, 1.0, 0);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < a2.size(); i++) {
-        glVertex2f(a2[i].x, a2[i].y);
-    }
-    glEnd();
-
-    std::vector<Point> b1;
-    std::vector<Point> b2;
-
-    for (double t = 0; t <= 1; t += 0.1) {
-        Point p1 = deCasteljau(points2, t); 
-        if (t <= 0.5) {
-            b1.push_back(p1);
-        }
-        if (t >= 0.5) {
-            b2.push_back(p1);
-        }
-    }
-    glColor3f(1.0, 0, 0);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < b1.size(); i++) {
-        glVertex2f(b1[i].x,b1[i].y);
-    }
-    glEnd();
-    glColor3f(0, 1.0, 0);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < b2.size(); i++) {
-        glVertex2f(b2[i].x, b2[i].y);
-    }
-    glEnd();
-    */
-
     // Schnittpunkte zeichnen
     if (doIntersection) {
         glColor3f(0.0,1.0,0.0);
@@ -451,14 +390,13 @@ void GLWidget::paintGL()
         intersectBezier(points1, points2, epsilon_intersection);
     }
     if (doSelfIntersection) {
-        glColor3f(1.0,0.0,1.0);
+        glColor3f(1.0,0,0);
         // AUFGABE: Hier Selbstschnitte zeichnen
         // dabei epsilon_intersection benutzen
         selfIntersectionBezier(points1, epsilon_intersection);
         selfIntersectionBezier(points2, epsilon_intersection);
     }
 }
-
 
 void GLWidget::initializeGL()
 {
