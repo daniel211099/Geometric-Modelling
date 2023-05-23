@@ -31,18 +31,6 @@ GLWidget::~GLWidget()
 {
 }
 
-
-double maxDelta3(const std::vector<Point>& points) {
-    double maxDelta = 0.0;
-
-    for (int i = 0; i < points.size() - 2; i++) {
-        double delta = std::abs(points[i + 2].x - 2 * points[i + 1].x + points[i].x);
-        maxDelta = std::max(maxDelta, delta);
-    }
-    return maxDelta;
-}
-
-
 double maxDelta2(const std::vector<Point>& points) {
     double maxDelta = 0.0;
 
@@ -73,8 +61,6 @@ std::vector<Point> drawBezierCurve(std::vector<Point> kontrollPunkte, double eps
     std::vector<Point> bezierPoints;
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_LINE_STRIP);
-    //glPointSize(7.0);
-    //glBegin(GL_POINTS);
     // Bestimmen der Punkte Bezier Punkte durch den deCasteljau Algorithmus
     for (double t = 0; t <= 1; t += epsilon_draw) {
         Point p1 = deCasteljau(kontrollPunkte, t); // Bestimmen der Bezier Punkte der ersten Bezier Kurve
@@ -107,15 +93,6 @@ BoundingBox getBoundingBox(std::vector<Point> pList) {
             yMax = pList[i].y;
         }
     }
-    //glColor3f(0, 1.0, 0);
-    //glBegin(GL_LINE_STRIP);
-    //glVertex2f(xMin, yMin);
-    //glVertex2f(xMax, yMin);
-    //glVertex2f(xMax, yMax);
-    ///glVertex2f(xMin, yMax);
-    ////glVertex2f(xMin, yMin);
-    ////
-    //glEnd();
 
     BoundingBox box = BoundingBox();
     box.xMin = xMin;
@@ -136,8 +113,6 @@ bool doBoundingBoxesIntersect(BoundingBox b, BoundingBox c) {
     return true;
 
 }
-
-
 
 Point calculateIntersectionV2(const Point& p1, const Point& p2, const Point& p3, const Point& p4) {
     // 1. Bestimmung der geraden gleichungen aus den gegebenen Punken
@@ -317,6 +292,30 @@ void selfIntersectionBezier(std::vector<Point> b, double eps) {
     }
 }
 
+std::vector<Point> computeBezierSegment(std::vector<Point> controlPoints, Point endPoint) {
+    int n = controlPoints.size() - 1;  // Degree of the original Bézier curve
+    std::vector<double> t(n + 1);
+    for (int i = 0; i <= n; ++i) {
+        t[i] = static_cast<double>(i) / n;  // Parameter values for the original curve
+    }
+
+    std::vector<Point> newControlPoints;
+    for (int i = 0; i < n; ++i) {
+        double p0x = controlPoints[i].x;
+        double p0y = controlPoints[i].y;
+        double p1x = controlPoints[i + 1].x;
+        double p1y = controlPoints[i + 1].y;
+        double newX = (1 - t[i]) * p0x + t[i] * p1x;
+        double newY = (1 - t[i]) * p0y + t[i] * p1y;
+        newControlPoints.emplace_back(newX, newY);
+    }
+
+    newControlPoints.push_back(endPoint);  // Add the end point as the last control point of the new segment
+
+    return newControlPoints;
+}
+
+
 void GLWidget::paintGL()
 {
     // clear
@@ -391,6 +390,10 @@ void GLWidget::paintGL()
         selfIntersectionBezier(points1, epsilon_intersection);
         selfIntersectionBezier(points2, epsilon_intersection);
     }
+
+    std::vector<Point> newPoints2 = computeBezierSegment(points1, Point(0, 0));
+    drawBezierCurve(newPoints2, epsilon_draw);
+
 }
 
 void GLWidget::initializeGL()
