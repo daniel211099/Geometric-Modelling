@@ -275,14 +275,10 @@ void intersectBezier(std::vector<Point> b, std::vector<Point> c, double eps) {
             if (!intersections.empty()) {
                 glPointSize(7.0);
                 glBegin(GL_POINTS);
-                std::cout << "Intersection points:\n";
                 for (const Point& intersection : intersections) {
                    glVertex2f(intersection.x, intersection.y);
                 }
                 glEnd();
-            }
-            else {
-                std::cout << "No intersections found.\n";
             }
         }
     }
@@ -319,7 +315,6 @@ void selfIntersectionBezier(std::vector<Point> b, double eps) {
 
         }
     }
-    std::cout << segments.size() << std::endl;
 }
 
 void GLWidget::paintGL()
